@@ -1,0 +1,21 @@
+dispute_id,suggested_action,justification
+D001,Auto-refund,Found a duplicate successful transaction within short timeframe.
+D002,Escalate to bank,Refund delayed. Escalate.
+D003,Auto-refund,Transaction is marked FAILED in system but user reports debit. Refund.
+D004,Mark as potential fraud,High severity claim. Immediate block and investigation required.
+D005,Auto-refund,Order was cancelled. Process refund if not done.
+D006,Auto-refund,Found a duplicate successful transaction within short timeframe.
+D007,Auto-refund,Transaction is marked FAILED in system but user reports debit. Refund.
+D008,Manual review,Category OTHERS or unclear rules.
+D009,Mark as potential fraud,High severity claim. Immediate block and investigation required.
+D010,Escalate to bank,Refund delayed. Escalate.
+D011,Manual review,Category OTHERS or unclear rules.
+D012,Check with Bank,Transaction is PENDING. Check upstream status.
+D013,Auto-refund,Found a duplicate successful transaction within short timeframe.
+D014,Manual review,Unusual status: PROCESSED
+D015,Auto-refund,Transaction is marked FAILED in system but user reports debit. Refund.
+D016,Mark as potential fraud,High severity claim. Immediate block and investigation required.
+D017,Manual review,User is waiting for refund on a SUCCESS transaction (possible return?)
+D018,Auto-refund,Found a duplicate successful transaction within short timeframe.
+D019,Auto-refund,Transaction is marked FAILED in system but user reports debit. Refund.
+D020,Auto-refund,Found a duplicate successful transaction within short timeframe.

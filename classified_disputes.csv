@@ -1,0 +1,21 @@
+dispute_id,predicted_category,confidence,explanation
+D001,DUPLICATE_CHARGE,0.9,User mentions multiple charges or duplication.
+D002,REFUND_PENDING,0.85,User is waiting for a refund or mentioned cancellation.
+D003,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D004,FRAUD,0.95,User explicitly mentioned fraud or unauthorized transaction.
+D005,REFUND_PENDING,0.85,User is waiting for a refund or mentioned cancellation.
+D006,DUPLICATE_CHARGE,0.9,User mentions multiple charges or duplication.
+D007,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D008,OTHERS,0.5,No specific keywords matched.
+D009,FRAUD,0.95,User explicitly mentioned fraud or unauthorized transaction.
+D010,REFUND_PENDING,0.85,User is waiting for a refund or mentioned cancellation.
+D011,OTHERS,0.5,No specific keywords matched.
+D012,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D013,DUPLICATE_CHARGE,0.9,User mentions multiple charges or duplication.
+D014,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D015,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D016,FRAUD,0.95,User explicitly mentioned fraud or unauthorized transaction.
+D017,REFUND_PENDING,0.85,User is waiting for a refund or mentioned cancellation.
+D018,DUPLICATE_CHARGE,0.9,User mentions multiple charges or duplication.
+D019,FAILED_TRANSACTION,0.85,User mentions transaction failure or money debited without success.
+D020,DUPLICATE_CHARGE,0.9,User mentions multiple charges or duplication.
