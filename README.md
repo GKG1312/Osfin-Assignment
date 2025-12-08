@@ -26,54 +26,6 @@ The application offers three modes, switchable via the sidebar:
 
 ---
 
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    subgraph Input [Data Sources]
-        D[Disputes.csv]
-        T[Transactions.csv]
-    end
-
-    %% Standard Mode
-    subgraph Mode1 [Standard: Rule-Based]
-        direction TB
-        RB_Class[Keyword Matcher]
-        RB_Res[Logic Resolver]
-        RB_Out[Static Dashboard]
-        RB_Class --> RB_Res --> RB_Out
-    end
-
-    %% Advanced Mode
-    subgraph Mode2 [Advanced: Hybrid ML & AI]
-        direction TB
-        ML_Class[ML Model (SVM)]
-        RAG[RAG Engine]
-        ML_Res[Logic Resolver]
-        ML_Out[Dashboard + AI Chat]
-        ML_Class --> ML_Res --> ML_Out
-        RAG -.-> ML_Out
-    end
-
-    %% Agentic Mode
-    subgraph Mode3 [Agentic: LLM-Only]
-        direction TB
-        Agent[Unified Agentic Pipeline]
-        LLM_Dec[Generative Reasoning]
-        Agent_Out[Agent Dashboard]
-        Agent --> LLM_Dec --> Agent_Out
-    end
-
-    %% Connections
-    D --> RB_Class
-    T --> RB_Res
-    D --> ML_Class
-    D --> RAG
-    T --> RAG
-    D --> Agent
-    T --> Agent
-```
-
 ## 🛠️ Project Structure
 
 ```
