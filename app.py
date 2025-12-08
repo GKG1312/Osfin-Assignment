@@ -15,12 +15,12 @@ from src.llm_engine import rag_engine
 st.set_page_config(page_title="FinAI Dispute Assistant", layout="wide", page_icon="🤖")
 # --- SIDEBAR CONFIGURATION ---
 st.sidebar.title("Configuration")
-mode = st.sidebar.radio("System Mode", ["Standard (Rule-Based)", "Advanced (ML & AI)"])
+mode = st.sidebar.radio("System Mode", ["Standard (Rule-Based)", "Advanced (ML & AI)", "Agentic (LLM-Only)"])
 
 api_key = ""
 provider = "openai"
 
-if mode == "Advanced (ML & AI)":
+if mode in ["Advanced (ML & AI)", "Agentic (LLM-Only)"]:
     st.sidebar.markdown("### 🧠 AI Settings")
     provider = st.sidebar.selectbox("LLM Provider", ["OpenAI", "Groq"])
     
@@ -29,7 +29,7 @@ if mode == "Advanced (ML & AI)":
     else:
         api_key = st.sidebar.text_input("Groq API Key", type="password")
         
-    st.sidebar.info(f"Model: {provider} based RAG Assistant")
+    st.sidebar.info(f"Model: {provider} based Assistant")
 
 # --- DATA LOADING ---
 @st.cache_data
@@ -71,7 +71,82 @@ def get_data(use_ml=False):
     final_df = merged.merge(resolutions, on="dispute_id")
     return final_df, disputes, transactions
 
-# Run Pipeline based on Mode
+# Separate State for Agentic Data
+if "agentic_df" not in st.session_state:
+    st.session_state.agentic_df = None
+
+# --- AGENTIC MODE LOGIC ---
+if mode == "Agentic (LLM-Only)":
+    from src.agentic_flow import AgenticPipeline
+    st.title("🤖 Fully Agentic Dispute Resolution")
+    st.info("In this mode, a single LLM Agent handles Classification, Decisioning, and Analytics contextually.")
+
+    disputes, transactions = load_data()
+    agent = AgenticPipeline(provider=provider.lower(), api_key=api_key)
+
+    if st.session_state.agentic_df is None:
+        st.write("### ⚠️ Agentic Process Required")
+        st.write("This process will send data to the LLM. It may take time and consume tokens.")
+        
+        if st.button("Start LLM Processing"):
+            if not api_key:
+                st.error("Please provide an API Key in the sidebar first.")
+            else:
+                progress_bar = st.progress(0, text="Initializing Agent...")
+                
+                def update_prog(curr, total):
+                    progress_bar.progress(curr / total, text=f"Processing Dispute {curr}/{total}")
+                
+                # Run Batch
+                results_df = agent.run_batch(disputes, transactions, progress_callback=update_prog)
+                
+                # Merge Back for Display
+                full_view = disputes.merge(results_df, on="dispute_id")
+                st.session_state.agentic_df = full_view
+                st.rerun()
+    else:
+        df = st.session_state.agentic_df
+        
+        # --- AGENTIC DASHBOARD ---
+        t1, t2 = st.tabs(["📊 Agent Decisions", "💬 Chat with Agent"])
+        
+        with t1:
+            # Metrics
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Processed Cases", len(df))
+            c2.metric("Confidence > 0.8", len(df[df["confidence"] > 0.8]))
+            c3.metric("Auto-Refunds", len(df[df["suggested_action"] == "Auto-refund"]))
+            
+            st.dataframe(df[["dispute_id", "description", "predicted_category", "suggested_action", "explanation"]], use_container_width=True)
+            
+            # Reset
+            if st.button("Reset / Clear Data"):
+                st.session_state.agentic_df = None
+                st.rerun()
+
+        with t2:
+            st.markdown("### 💬 Ask the Agent about its decisions")
+            if "msgs_agent" not in st.session_state:
+                st.session_state.msgs_agent = []
+                
+            for m in st.session_state.msgs_agent:
+                with st.chat_message(m["role"]):
+                    st.markdown(m["content"])
+                    
+            if q := st.chat_input("Ask about the dataset..."):
+                st.session_state.msgs_agent.append({"role": "user", "content": q})
+                with st.chat_message("user"):
+                    st.markdown(q)
+                
+                with st.chat_message("assistant"):
+                    with st.spinner("Agent is thinking..."):
+                        ans = agent.chat_with_data(q, df)
+                        st.markdown(ans)
+                st.session_state.msgs_agent.append({"role": "assistant", "content": ans})
+
+    st.stop() # Stop execution here so we don't render the standard dashboard below
+
+# --- STANDARD / ML MODE LOGIC ---
 use_ml_mode = (mode == "Advanced (ML & AI)")
 df, raw_disputes, raw_txns = get_data(use_ml=use_ml_mode)
 
