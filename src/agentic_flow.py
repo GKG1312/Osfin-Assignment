@@ -27,20 +27,24 @@ class AgenticPipeline:
             self.client = Groq(api_key=self.api_key)
             self.model = self.model or "llama-3.3-70b-versatile"
 
-    def _call_llm(self, system_prompt, user_prompt):
+    def _call_llm(self, system_prompt, user_prompt, is_json=False):
         if not self.client:
             return None
             
         try:
-            completion = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            params = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0.1, # Low temp for deterministic classification
-                response_format={"type": "json_object"} if self.provider == "openai" else None
-            )
+                "temperature": 0.1
+            }
+            
+            if is_json and self.provider == "openai":
+                params["response_format"] = {"type": "json_object"}
+                
+            completion = self.client.chat.completions.create(**params)
             return completion.choices[0].message.content
         except Exception as e:
             print(f"LLM Call Error: {e}")
@@ -79,7 +83,7 @@ class AgenticPipeline:
             "Provide your JSON decision:"
         )
         
-        response = self._call_llm(system_prompt, user_prompt)
+        response = self._call_llm(system_prompt, user_prompt, is_json=True)
         
         # Parse JSON
         try:
@@ -91,7 +95,7 @@ class AgenticPipeline:
             else:
                 return {"predicted_category": "ERROR", "suggested_action": "Manual review", "confidence": 0.0, "explanation": "LLM call failed."}
         except json.JSONDecodeError:
-            return {"predicted_category": "OTHERS", "suggested_action": "Manual review", "confidence": 0.0, "explanation": "LLM output parsing failed."}
+            return {"predicted_category": "OTHERS", "suggested_action": "Manual review", "confidence": 0.0, "explanation": f"LLM output parsing failed. Raw: {response[:100] if response else 'None'}"}
 
     def run_batch(self, disputes_df, transactions_df, progress_callback=None):
         """
@@ -128,7 +132,8 @@ class AgenticPipeline:
         # and top rows to the LLM context.
         
         stats = processed_df["predicted_category"].value_counts().to_dict()
-        sample_data = processed_df.to_csv(index=False)
+        # Fix: Only send the first 10 rows to avoid token limit issues
+        sample_data = processed_df.head(10).to_csv(index=False)
         
         system_prompt = (
             "You are a Data Analyst Assistant. You have access to the processed dispute dataset. "
@@ -141,4 +146,4 @@ class AgenticPipeline:
             f"User Query: {query}"
         )
         
-        return self._call_llm(system_prompt, user_prompt)
+        return self._call_llm(system_prompt, user_prompt, is_json=False)
