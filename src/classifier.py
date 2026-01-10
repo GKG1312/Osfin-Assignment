@@ -13,7 +13,7 @@ def classify_dispute(description):
         return "FRAUD", 0.95, "User explicitly mentioned fraud or unauthorized transaction."
     
     # Priority 2: Duplicate
-    if any(keyword in desc_lower for keyword in ["twice", "double", "duplicate", "two debit"]):
+    if any(keyword in desc_lower for keyword in ["twice", "double", "duplicate", "two debit", "two upi", "two upi debit"]):
         return "DUPLICATE_CHARGE", 0.90, "User mentions multiple charges or duplication."
     
     # Priority 3: Refund Pending
@@ -21,7 +21,7 @@ def classify_dispute(description):
         return "REFUND_PENDING", 0.85, "User is waiting for a refund or mentioned cancellation."
     
     # Priority 4: Failed Transaction
-    if any(keyword in desc_lower for keyword in ["failed", "stuck", "debited", "not received", "fail"]):
+    if any(keyword in desc_lower for keyword in ["failed", "stuck", "debited", "not received", "fail", "wrong beneficiary"]):
         return "FAILED_TRANSACTION", 0.85, "User mentions transaction failure or money debited without success."
         
     return "OTHERS", 0.50, "No specific keywords matched."
